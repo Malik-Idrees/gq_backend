@@ -1,8 +1,11 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 
 from base.data import courses
 # Create your views here.
+
 def getRoutes(request):
     routes= [
         '/api/course/', #Get all courses(Only one)
@@ -15,6 +18,8 @@ def getRoutes(request):
     ]
     return JsonResponse(routes,safe=False)
 
+@api_view(['GET'])
 def getCourse(request):
     # return HttpResponse(courses.courses, content_type="application/json")
-    return JsonResponse(courses.courses,safe=False)
+    # return JsonResponse(courses.courses,safe=False)
+    return Response(courses.courses)
