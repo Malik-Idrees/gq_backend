@@ -4,6 +4,8 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 
 from base.data import courses
+from base.serializers import CourseSerializer, TopicSerializer, VideoSerializer
+from .models import Course, Profile, Topic, Video
 # Create your views here.
 
 def getRoutes(request):
@@ -18,8 +20,33 @@ def getRoutes(request):
     ]
     return JsonResponse(routes,safe=False)
 
+
 @api_view(['GET'])
 def getCourse(request):
-    # return HttpResponse(courses.courses, content_type="application/json")
     # return JsonResponse(courses.courses,safe=False)
-    return Response(courses.courses)
+    user = request.user
+    topics = Topic.objects.filter(course=user.course.id)
+    
+    serializer = TopicSerializer(topics,many=True)
+    return Response(serializer.data)
+
+
+# Get all videos of every topics -> []
+@api_view(['GET'])
+def getVideos(request):
+    user = request.user
+    topic = Topic.objects.filter(course=user.course.id)
+    data = []
+    for topic in topic:
+        videos = topic.video_set.all()
+        serializer = VideoSerializer(videos, many=True)
+        data+=serializer.data
+    return Response(data)
+
+
+@api_view(['GET'])
+def test(req):
+    video = Video.objects.prefetch_related('topic')
+    # video = Video.objects.filter(topic=1).prefetch_related('topic')
+    serializer = VideoSerializer(video, many=True)
+    return Response(serializer.data)
