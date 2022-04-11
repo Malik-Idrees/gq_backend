@@ -49,4 +49,5 @@ def test(req):
     video = Video.objects.prefetch_related('topic')
     # video = Video.objects.filter(topic=1).prefetch_related('topic')
     serializer = VideoSerializer(video, many=True)
+    print(repr(serializer))
     return Response(serializer.data)

@@ -25,12 +25,16 @@ class VideoSerializer(serializers.ModelSerializer):
 
 class TopicSerializer(serializers.ModelSerializer):
     videos = serializers.SerializerMethodField(read_only=True)
+    # videos = VideoSerializer(many=True,read_only=True) # Alternative to get_videos Approach, requires related name
 
     class Meta:
         model = Topic
         fields = '__all__'
 
     def get_videos(self, obj):
-        videos = obj.video_set.all()
+        #obj type : Topic
+        # Topic.video_set.all() Retrives all videos associated to topic
+        videos = obj.video_set.all() 
+        # videos = obj.videos.all() #"videos" as a related name on (FK) in Videos table.
         serializer = VideoSerializer(videos, many=True)
         return serializer.data
