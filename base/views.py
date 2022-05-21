@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from base.serializers import CourseSerializer, ProfileSerializer, TopicSerializer, VideoSerializer
-from .models import Course, Profile, Topic, Video
+from .models import Course, GoogleLink, Profile, Topic, Video
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
@@ -14,6 +14,8 @@ User = get_user_model()
 # Test Data
 from base.data import courses
 from base.data import topics
+from base.data import google_data
+from base.data import yt_data
 
 def getRoutes(request):
     routes= [
@@ -43,7 +45,6 @@ def getCourse(request):
 
         if request.method == 'POST':
             data = request.data
-            goalToAchieve = data['goalToAchieve']
 
             course = Course.objects.create(
                 user=user,
@@ -54,26 +55,47 @@ def getCourse(request):
             )
 
             # Processing and supposed topics output
+
+            list_of_links = google_data.google_data
+            topicLinksList  = [topic['topic'] for topic in list_of_links] # ['data analytics', 'large data sets','...']
+
+ 
+            #Added Youtube links to the topics suggested for course
             for topic in topics.topics:
 
                 #Only Add a skill if it has relevant videos
                 if len(topic['data']):
+
                     newSkill = Topic.objects.create(
                         course=course,
-                        title=goalToAchieve,
+                        title=topic['topic'],
                     )
 
                     for data in topic['data']:
                         if len(data):
-                            print(data)
-                        video = Video.objects.create(
-                            topic=newSkill,
-                            title=data['title'],
-                            # views=data['views'].split()[0][:-1], #Store a number instead of str like `212k views` 
-                            views=data['views'], 
-                            href=data['href'],
-                        )
-                        print("video added to topic")
+                            video = Video.objects.create(
+                                topic=newSkill,
+                                title=data['title'],
+                                # views=data['views'].split()[0][:-1], #Store a number instead of str like `212k views` 
+                                views=data['views'], 
+                                href=data['href'],
+                            )
+                            print(f"video added to topic {newSkill}")
+                    
+                    #if topic in links list also exist in YT links list, then add the google links to that topic.
+                    if topic['topic'] in topicLinksList:
+
+                        print(f" {topic['topic']} is common in both google_data and yt_Data")
+
+                        for x in [x for x in list_of_links if(x['topic'] == topic['topic'])]:
+                            if len(x['links']):
+                                for data in x['links']:
+                                    newLink = GoogleLink.objects.create(
+                                    topic=newSkill,
+                                    link=data['link'],
+                                    title=data['title'],
+                                    )
+                                    print(f"link added to topic {newSkill}")
 
             return Response({'message':'Success'}, status=status.HTTP_201_CREATED)
             # serializer = CourseSerializer(course,many=False)
@@ -159,7 +181,8 @@ def profile(request):
 @api_view(['GET'])
 def test(req):
     video = Video.objects.prefetch_related('topic')
+    # print(video[0].__dict__)
     # video = Video.objects.filter(topic=1).prefetch_related('topic')
     serializer = VideoSerializer(video, many=True)
-    print(repr(serializer))
+    # print(repr(serializer))
     return Response(serializer.data)

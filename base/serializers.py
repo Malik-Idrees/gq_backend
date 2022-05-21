@@ -1,7 +1,5 @@
-from pyexpat import model
 from rest_framework import serializers
-from django.contrib.auth.models import User
-from .models import Course, Topic, Video, Profile
+from .models import Course, GoogleLink, Topic, Video, Profile
 
 class CourseSerializer(serializers.ModelSerializer):
     class Meta:
@@ -23,22 +21,32 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 class VideoSerializer(serializers.ModelSerializer):
-    topic = serializers.SlugRelatedField(
-        many=False,
-        read_only=True,
-        slug_field='title'
-    )
+    # topic = serializers.SlugRelatedField(
+    #     many=False,
+    #     read_only=True,
+    #     slug_field='title'
+    # )
 
     topic_id = serializers.CharField(read_only=True)
+    topic = serializers.CharField(read_only=True)
 
     class Meta:
         model = Video
         fields = '__all__' 
 
 
+class GoogleLinkSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model= GoogleLink
+        fields = '__all__' 
+
+
+
 class TopicSerializer(serializers.ModelSerializer):
     videos = serializers.SerializerMethodField(read_only=True)
     # videos = VideoSerializer(many=True,read_only=True) # Alternative to get_videos Approach, requires related name
+    links = GoogleLinkSerializer(many=True,read_only=True) #using related name
 
     class Meta:
         model = Topic
