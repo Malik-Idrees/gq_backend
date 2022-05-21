@@ -5,13 +5,15 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 
-from base.data import courses
 from base.serializers import CourseSerializer, ProfileSerializer, TopicSerializer, VideoSerializer
 from .models import Course, Profile, Topic, Video
 
 from django.contrib.auth import get_user_model
 User = get_user_model()
-# Create your views here.
+
+# Test Data
+from base.data import courses
+from base.data import topics
 
 def getRoutes(request):
     routes= [
@@ -25,36 +27,98 @@ def getRoutes(request):
     ]
     return JsonResponse(routes,safe=False)
 
-#Tested for errors
-@api_view(['GET','POST'])
+@api_view(['GET', 'POST'])
 def getCourse(request):
+        user = request.user
+
+        if request.method == 'GET':
+
+            try:
+                topics_list = Course.objects.filter(user=user)
+            except:
+                return Response({"message":"No courses foun"})
+            
+            serializer = CourseSerializer(topics_list,many=True)
+            return Response(serializer.data)
+
+        if request.method == 'POST':
+            data = request.data
+            goalToAchieve = data['goalToAchieve']
+
+            course = Course.objects.create(
+                user=user,
+                goalToAchieve=data['goalToAchieve'],
+                expertiseLevel=data['expertiseLevel'],
+                jobRequired=data['jobRequired'],
+                dailyTime=data['dailyTime'],
+            )
+
+            # Processing and supposed topics output
+            for topic in topics.topics:
+
+                #Only Add a skill if it has relevant videos
+                if len(topic['data']):
+                    newSkill = Topic.objects.create(
+                        course=course,
+                        title=goalToAchieve,
+                    )
+
+                    for data in topic['data']:
+                        if len(data):
+                            print(data)
+                        video = Video.objects.create(
+                            topic=newSkill,
+                            title=data['title'],
+                            # views=data['views'].split()[0][:-1], #Store a number instead of str like `212k views` 
+                            views=data['views'], 
+                            href=data['href'],
+                        )
+                        print("video added to topic")
+
+            return Response({'message':'Success'}, status=status.HTTP_201_CREATED)
+            # serializer = CourseSerializer(course,many=False)
+
+
+
+@api_view(['GET'])
+def getCourseDetail(request, pk):
     # return JsonResponse(courses.courses,safe=False)
     user = request.user
 
-    try:
-        topics = Topic.objects.filter(course=user.course.id)
-    except Course.DoesNotExist:
-        return Response({"error":"Content does not exist.Generate?"})
-    
-    serializer = TopicSerializer(topics,many=True)
-    return Response(serializer.data)
+    if request.method == 'GET':
+
+        try:
+            topics_list = Topic.objects.filter(course=pk)
+        except Course.DoesNotExist:
+            return Response({"error":"Content does not exist.Generate?"})
+        
+        serializer = TopicSerializer(topics_list,many=True)
+        return Response(serializer.data)
 
 
-# Get all videos of every topics -> []
+
+# Get all videos of every topic -> []
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def getVideos(request):
     user = request.user
-    topicList = Topic.objects.filter(course=user.course.id)
+
+    courses = Course.objects.filter(user=user)
     data = []
-    for topic in topicList:
-        videos = topic.video_set.all()
-        serializer = VideoSerializer(videos, many=True)
+
+    for course in courses:
+
+        topicList = Topic.objects.filter(course=course)
+        # print(topicList[0].course)
+        serializer = TopicSerializer(topicList, many=True)
+
         data+=serializer.data
-    return Response(data)
+
+    response = [( Response({'message':'no videos'}, status=status.HTTP_200_OK)), Response(data)] [len(data)>0]
+    return response
 
 
-#Tested for errors
+
 @api_view(['GET', 'POST'])
 @permission_classes([IsAuthenticated])
 def profile(request):
