@@ -9,9 +9,17 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProfileSerializer(serializers.ModelSerializer):
+
+    # user = serializers.StringRelatedField(many=False) #user is the foreign key, returns __str__ repr of user model
+    username = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Profile
         fields = '__all__'
+
+    def get_username(self, obj):
+        return obj.user.username
+
 
 
 class VideoSerializer(serializers.ModelSerializer):

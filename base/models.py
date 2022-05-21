@@ -20,10 +20,10 @@ class Course(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=200, null=True, blank=True) #John
+    age = models.IntegerField(null=True, blank=True,default=0)
+    profession = models.CharField(max_length=200, null=True, blank=True) #Android Developer
     expertiseLevel = models.CharField(max_length=200, null=True, blank=True) #Beginner || Intermediate || Expert
-    goalToAchieve = models.CharField(max_length=200, null=True, blank=True) #Software engineer
-    profession = models.CharField(max_length=200, null=True, blank=True) #Android Development
-    dailyTime = models.IntegerField(null=True, blank=True,default=0)
     
 
     def __str__(self):

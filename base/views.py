@@ -132,10 +132,10 @@ def profile(request):
 
         profile = Profile.objects.create(
             user=user,
-            expertiseLevel=data['expertiseLevel'],
-            goalToAchieve=data['goalToAchieve'],
+            goalToAchieve=data['name'],
+            dailyTime=data['age'],
             profession=data['profession'],
-            dailyTime=data['dailyTime']
+            expertiseLevel=data['expertiseLevel'],
         )
         serializer = ProfileSerializer(profile,many=False)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
