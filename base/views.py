@@ -100,7 +100,7 @@ def courseHandler(request):
 
 
 
-@api_view(['GET'])
+@api_view(['GET','POST'])
 def getCourseDetail(request, pk):
     # return JsonResponse(courses.courses,safe=False)
     user = request.user
@@ -115,6 +115,16 @@ def getCourseDetail(request, pk):
         serializer = TopicSerializer(topics_list,many=True)
         return Response(serializer.data)
 
+
+@api_view(['GET','POST'])
+def updateVideoToCompleted(request, pk):
+    print(pk)
+    if request.method == 'POST':
+        video = Video.objects.get(id=pk)
+        video.watched = True
+        video.save()
+        return JsonResponse('video set to watched',safe=False)
+        # return Response('video set to watched')
 
 
 # Get all videos of every topic -> []

@@ -7,5 +7,6 @@ urlpatterns = [
     path('course/<int:pk>',views.getCourseDetail,name='course'),
     path('profile/',views.profile,name='profile'),
     path('videos/',views.getVideos,name='videos'),
+    path('videos/<int:pk>',views.updateVideoToCompleted,name='updateVideo'),
     path('test/',views.test,name='test') #Just For Experiments
 ]
