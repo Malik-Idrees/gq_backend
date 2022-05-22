@@ -39,15 +39,15 @@ class Topic(models.Model):
         return str(self.title)
 
 class GoogleLink(models.Model):
-    topic = models.ForeignKey(Topic,related_name='links' ,on_delete=models.SET_NULL, null=True)
+    topic = models.ForeignKey(Topic,related_name='links' ,on_delete=models.CASCADE, null=True)
     link = models.CharField(max_length=200, null=True, blank=True)
     title = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
-        return str(self.id)
+        return str(self.title)
 
 class Video(models.Model):
-    topic = models.ForeignKey(Topic, on_delete=models.SET_NULL, null=True)
+    topic = models.ForeignKey(Topic, on_delete=models.CASCADE, null=True)
     title = models.CharField(max_length=200, null=True, blank=True)
     views = models.CharField(max_length=200, null=True, blank=True)
     href = models.CharField(max_length=500,null=True, blank=True)

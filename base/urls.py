@@ -3,7 +3,7 @@ from . import views
 
 urlpatterns = [
     path('',views.getRoutes,name='routes'),
-    path('course/',views.getCourse,name='course'),
+    path('course/',views.courseHandler,name='course'),
     path('course/<int:pk>',views.getCourseDetail,name='course'),
     path('profile/',views.profile,name='profile'),
     path('videos/',views.getVideos,name='videos'),

@@ -12,10 +12,8 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 # Test Data
-from base.data import courses
-from base.data import topics
-from base.data import google_data
-from base.data import yt_data
+from base.data import google_data_web_dev
+from base.data import yt_data_web_dev
 
 def getRoutes(request):
     routes= [
@@ -30,7 +28,7 @@ def getRoutes(request):
     return JsonResponse(routes,safe=False)
 
 @api_view(['GET', 'POST'])
-def getCourse(request):
+def courseHandler(request):
         user = request.user
 
         if request.method == 'GET':
@@ -56,12 +54,12 @@ def getCourse(request):
 
             # Processing and supposed topics output
 
-            list_of_links = google_data.google_data
-            topicLinksList  = [topic['topic'] for topic in list_of_links] # ['data analytics', 'large data sets','...']
+            list_of_links = google_data_web_dev.google_data
+            topics_in_links  = [topic['topic'] for topic in list_of_links] # ['data analytics', 'large data sets','...']
 
  
             #Added Youtube links to the topics suggested for course
-            for topic in topics.topics:
+            for topic in yt_data_web_dev.youtube_data:
 
                 #Only Add a skill if it has relevant videos
                 if len(topic['data']):
@@ -83,8 +81,8 @@ def getCourse(request):
                             print(f"video added to topic {newSkill}")
                     
                     #if topic in links list also exist in YT links list, then add the google links to that topic.
-                    if topic['topic'] in topicLinksList:
-
+                    if topic['topic'] in topics_in_links:
+ 
                         print(f" {topic['topic']} is common in both google_data and yt_Data")
 
                         for x in [x for x in list_of_links if(x['topic'] == topic['topic'])]:
